@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mohtasham Carpets — Hand-knotted in Kashan</title>
+<meta name="description" content="Mohtasham Carpets — hand-knotted Persian carpets of wool and silk from Kashan, Iran.">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&family=Vazirmatn:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="home">
+
+<section class="hero">
+  <div class="container hero-inner">
+    <div>
+      <p class="hero-kicker" data-i18n="hero.kicker"></p>
+      <h1 data-i18n="hero.title"></h1>
+      <p class="hero-lead" data-i18n="hero.lead"></p>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href="/collection.html" data-i18n="hero.cta"></a>
+        <a class="btn btn-ghost" href="/about.html" data-i18n="hero.cta2"></a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <img src="/assets/logo-light.svg" alt="Mohtasham Carpets emblem">
+    </div>
+  </div>
+</section>
+
+<section class="scroll-stage">
+  <div class="scroll-perspective">
+    <div class="scroll-title">
+      <span class="kicker" data-i18n="scrolldemo.kicker"></span>
+      <h2 data-i18n="scrolldemo.title"></h2>
+    </div>
+    <div class="scroll-card">
+      <div class="scroll-card-inner">
+        <img src="/assets/collections/france/france-02.jpg" alt="France collection — marble medallion carpet">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2 data-i18n="home.collections"></h2>
+      <p data-i18n="home.collections.sub"></p>
+    </div>
+    <div class="coll-grid" id="coll-grid"></div>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2 data-i18n="home.featured"></h2>
+      <p data-i18n="home.featured.sub"></p>
+    </div>
+    <div class="grid" id="featured-grid"></div>
+    <div class="center-cta reveal">
+      <a class="btn btn-teal" href="/collection.html" data-i18n="home.viewAll"></a>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="container">
+    <div class="band-inner">
+      <div class="reveal">
+        <p class="band-kicker" data-i18n="home.heritage.kicker"></p>
+        <h2 data-i18n="home.heritage.title"></h2>
+        <p data-i18n="home.heritage.text"></p>
+        <a class="btn btn-gold" href="/about.html" data-i18n="home.heritage.cta"></a>
+      </div>
+      <div class="band-art reveal">
+        <img src="/assets/collections/helena/helena-02.jpg" alt="Helena collection carpet">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container stats">
+  <div class="stat reveal"><b>1,000</b><span data-i18n="home.stat.knots"></span></div>
+  <div class="stat reveal"><b>200+</b><span data-i18n="home.stat.years"></span></div>
+  <div class="stat reveal"><b>100%</b><span data-i18n="home.stat.hand"></span></div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="spline-card reveal">
+      <div class="spline-text">
+        <span class="kicker" data-i18n="spline.kicker"></span>
+        <h2 data-i18n="spline.title"></h2>
+        <p data-i18n="spline.text"></p>
+      </div>
+      <div class="spline-stage" data-scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode">
+        <div class="spline-loading" data-i18n="spline.loading"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-strip">
+  <div class="container reveal">
+    <h2 data-i18n="home.contact.title"></h2>
+    <p data-i18n="home.contact.text"></p>
+    <a class="btn btn-teal" href="/contact.html" data-i18n="home.contact.cta"></a>
+  </div>
+</section>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/main.js"></script>
+<script>
+document.addEventListener('chrome-ready', async () => {
+  const grid = document.getElementById('featured-grid');
+  const collGrid = document.getElementById('coll-grid');
+  const [collections, products] = await Promise.all([
+    api('/api/collections'),
+    api('/api/products?featured=1'),
+  ]);
+  const render = () => {
+    collGrid.innerHTML = collections.map((c) => `
+      <a class="coll-card reveal visible" href="/collection.html?c=${c.slug}">
+        <img src="${c.cover}" alt="${lf(c, 'name')}" loading="lazy">
+        <div class="coll-overlay">
+          <h3>${lf(c, 'name')}</h3>
+          <p>${lf(c, 'spec')}</p>
+          <span>${c.count} ${t('home.designs')}</span>
+        </div>
+      </a>`).join('');
+    grid.innerHTML = products.map(productCard).join('');
+    grid.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+  };
+  render();
+  document.addEventListener('langchange', render);
+});
+</script>
+</body>
+</html>

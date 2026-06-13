@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Mohtasham Carpets</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&family=Vazirmatn:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="contact">
+
+<section class="page-hero">
+  <div class="container">
+    <h1 data-i18n="contact.title"></h1>
+    <p data-i18n="contact.sub"></p>
+  </div>
+</section>
+
+<div class="container contact-layout">
+  <form class="form-grid" id="contact-form" novalidate>
+    <div class="form-note" id="form-note"></div>
+    <div class="field">
+      <label for="f-name" data-i18n="contact.name"></label>
+      <input id="f-name" name="name" type="text" maxlength="200" required>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label for="f-phone" data-i18n="contact.phone"></label>
+        <input id="f-phone" name="phone" type="tel" maxlength="50" dir="ltr">
+      </div>
+      <div class="field">
+        <label for="f-email" data-i18n="contact.email"></label>
+        <input id="f-email" name="email" type="email" maxlength="200" dir="ltr">
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-message" data-i18n="contact.message"></label>
+      <textarea id="f-message" name="message" maxlength="5000" required></textarea>
+    </div>
+    <div>
+      <button class="btn btn-teal" type="submit" id="send-btn" data-i18n="contact.send"></button>
+    </div>
+  </form>
+
+  <aside class="contact-card">
+    <div class="contact-card-inner">
+      <h3 data-i18n="contact.info.title"></h3>
+      <div class="contact-line">
+        <b data-i18n="nav.contact"></b>
+        <span data-i18n="contact.info.address"></span>
+      </div>
+      <div class="contact-line">
+        <b data-i18n="contact.info.phone"></b>
+        <a href="tel:+983155999000" dir="ltr">+98 31 5599 9000</a>
+      </div>
+      <div class="contact-line">
+        <b data-i18n="contact.info.email"></b>
+        <a href="mailto:info@mohtashamcarpet.com" dir="ltr">info@mohtashamcarpet.com</a>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/main.js"></script>
+<script>
+document.addEventListener('chrome-ready', () => {
+  const form = document.getElementById('contact-form');
+  const note = document.getElementById('form-note');
+  const sendBtn = document.getElementById('send-btn');
+
+  const about = new URLSearchParams(location.search).get('about');
+  if (about) form.message.value = `${about}: `;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    note.className = 'form-note';
+    if (!form.name.value.trim() || !form.message.value.trim()) {
+      note.textContent = t('contact.required');
+      note.classList.add('err');
+      return;
+    }
+    sendBtn.disabled = true;
+    sendBtn.textContent = t('contact.sending');
+    try {
+      await api('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.value,
+          phone: form.phone.value,
+          email: form.email.value,
+          message: form.message.value,
+        }),
+      });
+      note.textContent = t('contact.ok');
+      note.classList.add('ok');
+      form.reset();
+    } catch {
+      note.textContent = t('contact.err');
+      note.classList.add('err');
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = t('contact.send');
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carpet — Mohtasham Carpets</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&family=Vazirmatn:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="collection">
+
+<div class="container">
+  <div class="product-layout" id="product-root"></div>
+</div>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/main.js"></script>
+<script>
+document.addEventListener('chrome-ready', async () => {
+  const root = document.getElementById('product-root');
+  const id = new URLSearchParams(location.search).get('id');
+  let product = null;
+  try {
+    product = await api(`/api/products/${encodeURIComponent(id)}`);
+  } catch {
+    root.innerHTML = `<p class="empty-note">${t('product.notfound')}</p>`;
+    return;
+  }
+
+  const render = () => {
+    document.title = `${lf(product, 'name')} — Mohtasham Carpets`;
+    root.innerHTML = `
+      <div class="product-img"><img src="${product.image}" alt="${lf(product, 'name')}"></div>
+      <div class="product-info">
+        <h1>${lf(product, 'name')}</h1>
+        <p class="product-desc">${lf(product, 'desc')}</p>
+        <table class="spec-table">
+          <tr><th>${t('product.collection')}</th><td><a href="/collection.html?c=${product.collection}">${lf(product, 'collection')}</a></td></tr>
+          <tr><th>${t('product.knots')}</th><td>${lf(product, 'spec') || product.knots}</td></tr>
+          <tr><th>${t('product.material')}</th><td>${lf(product, 'material')}</td></tr>
+          <tr><th>${t('product.size')}</th><td dir="ltr">${product.size}</td></tr>
+        </table>
+        <a class="btn btn-gold" href="/contact.html?about=${encodeURIComponent(product.name_en)}">${t('product.inquire')}</a>
+        <br>
+        <a class="back-link" href="/collection.html">← ${t('product.back')}</a>
+      </div>`;
+  };
+  render();
+  document.addEventListener('langchange', render);
+});
+</script>
+</body>
+</html>

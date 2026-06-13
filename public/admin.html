@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Mohtasham Carpets</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&family=Vazirmatn:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  body { background: var(--ivory); }
+  .admin-wrap { max-width: 1100px; margin: 40px auto 80px; padding-inline: 24px; }
+  .admin-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap; gap: 14px; }
+  .admin-top img { height: 64px; }
+  .admin-panel { background: #fff; border: 1px solid var(--gold-pale); border-radius: var(--radius); box-shadow: var(--shadow); padding: 30px; margin-bottom: 30px; }
+  .admin-panel h2 { margin-bottom: 18px; font-size: 1.4rem; }
+  .login-box { max-width: 420px; margin: 80px auto; }
+  .tabs { display: flex; gap: 10px; margin-bottom: 26px; flex-wrap: wrap; }
+  .tab-btn { border: 1px solid var(--gold); background: none; color: var(--teal); padding: 8px 22px; border-radius: 999px; }
+  .tab-btn.active { background: var(--teal); color: var(--ivory); border-color: var(--teal); }
+  table.admin-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .admin-table th, .admin-table td { padding: 10px 8px; border-bottom: 1px solid var(--gold-pale); text-align: start; vertical-align: middle; }
+  .admin-table th { color: var(--gray); font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; font-size: 12.5px; }
+  .admin-table img { width: 44px; height: 58px; object-fit: cover; border-radius: 4px; }
+  .row-actions { display: flex; gap: 8px; }
+  .mini-btn { border: 1px solid var(--gold-pale); background: var(--ivory-soft); padding: 5px 12px; border-radius: 4px; font-size: 13px; }
+  .mini-btn:hover { border-color: var(--gold); }
+  .mini-btn.danger { color: #8c2f2f; }
+  .mini-btn.danger:hover { border-color: #c98787; background: #faeeee; }
+  .msg-card { border: 1px solid var(--gold-pale); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; background: var(--ivory-soft); }
+  .msg-card.unread { border-inline-start: 4px solid var(--gold); background: #fff; }
+  .msg-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; font-size: 14px; color: var(--gray); }
+  .msg-head b { color: var(--teal); font-weight: 500; }
+  .hidden { display: none !important; }
+  .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+  .badge { background: var(--gold); color: var(--teal-deep); border-radius: 999px; font-size: 12px; padding: 2px 10px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<div class="admin-wrap">
+  <!-- login -->
+  <div id="login-view" class="hidden">
+    <div class="admin-panel login-box">
+      <img src="/assets/logo.svg" alt="Mohtasham Carpets" style="height:90px;margin:0 auto 20px;">
+      <h2 style="text-align:center;">Admin Login</h2>
+      <form id="login-form" class="form-grid">
+        <div class="form-note" id="login-note"></div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-teal" type="submit">Sign in</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- dashboard -->
+  <div id="dash-view" class="hidden">
+    <div class="admin-top">
+      <a href="/"><img src="/assets/logo.svg" alt="Mohtasham Carpets"></a>
+      <div style="display:flex;gap:10px;">
+        <a class="mini-btn" href="/" target="_blank">View site ↗</a>
+        <button class="mini-btn" id="logout-btn">Log out</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="products">Carpets</button>
+      <button class="tab-btn" data-tab="messages">Messages <span class="badge hidden" id="unread-badge"></span></button>
+      <button class="tab-btn" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- products tab -->
+    <div id="tab-products">
+      <div class="admin-panel">
+        <h2 id="form-title">Add a carpet</h2>
+        <form id="product-form" class="form-grid" enctype="multipart/form-data">
+          <div class="form-note" id="product-note"></div>
+          <input type="hidden" name="id">
+          <div class="form-row">
+            <div class="field"><label>Name (English) *</label><input name="name_en" required maxlength="200"></div>
+            <div class="field"><label>Name (Farsi) *</label><input name="name_fa" dir="rtl" required maxlength="200"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Description (English)</label><textarea name="desc_en" style="min-height:80px;"></textarea></div>
+            <div class="field"><label>Description (Farsi)</label><textarea name="desc_fa" dir="rtl" style="min-height:80px;"></textarea></div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Collection</label>
+              <select name="collection" id="collection-select"></select>
+            </div>
+            <div class="field"><label>Size</label><input name="size" placeholder="3 × 4 m" maxlength="60"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Material (English)</label><input name="material_en" maxlength="100"></div>
+            <div class="field"><label>Material (Farsi)</label><input name="material_fa" dir="rtl" maxlength="100"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Knot density</label><input name="knots" placeholder="700 KPSI" maxlength="60"></div>
+            <div class="field"><label>Photo (jpg / png / webp)</label><input name="image" type="file" accept="image/*"></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:15px;">
+            <input type="checkbox" name="featured" style="width:auto;"> Show on the home page (featured)
+          </label>
+          <div class="form-actions">
+            <button class="btn btn-teal" type="submit" id="save-btn">Save carpet</button>
+            <button class="mini-btn hidden" type="button" id="cancel-edit">Cancel editing</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-panel">
+        <h2>Current carpets</h2>
+        <table class="admin-table">
+          <thead><tr><th></th><th>Name</th><th>Collection</th><th>Size</th><th>Featured</th><th></th></tr></thead>
+          <tbody id="product-rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- messages tab -->
+    <div id="tab-messages" class="hidden">
+      <div class="admin-panel">
+        <h2>Messages from the contact form</h2>
+        <div id="message-list"></div>
+      </div>
+    </div>
+
+    <!-- settings tab -->
+    <div id="tab-settings" class="hidden">
+      <div class="admin-panel" style="max-width:480px;">
+        <h2>Change admin password</h2>
+        <form id="password-form" class="form-grid">
+          <div class="form-note" id="password-note"></div>
+          <div class="field"><label>Current password</label><input name="current" type="password" autocomplete="current-password" required></div>
+          <div class="field"><label>New password (min 8 characters)</label><input name="next" type="password" autocomplete="new-password" minlength="8" required></div>
+          <button class="btn btn-teal" type="submit">Change password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const $ = (sel) => document.querySelector(sel);
+
+async function api(url, options) {
+  const res = await fetch(url, options);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(body.error || 'request failed'), { status: res.status });
+  return body;
+}
+
+function note(id, text, ok) {
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'form-note ' + (ok ? 'ok' : 'err');
+  if (ok) setTimeout(() => { el.className = 'form-note'; }, 4000);
+}
+
+// ---------- auth ----------
+
+async function boot() {
+  const { loggedIn } = await api('/api/admin/session');
+  $('#login-view').classList.toggle('hidden', loggedIn);
+  $('#dash-view').classList.toggle('hidden', !loggedIn);
+  if (loggedIn) { loadCollections(); loadProducts(); loadMessages(); }
+}
+
+async function loadCollections() {
+  const collections = await api('/api/collections');
+  $('#collection-select').innerHTML = collections
+    .map((c) => `<option value="${c.slug}">${c.name_en} — ${c.name_fa}</option>`).join('');
+}
+
+$('#login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await api('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: $('#login-password').value }),
+    });
+    boot();
+  } catch {
+    note('#login-note', 'Wrong password.', false);
+  }
+});
+
+$('#logout-btn').addEventListener('click', async () => {
+  await api('/api/admin/logout', { method: 'POST' });
+  boot();
+});
+
+// ---------- tabs ----------
+
+document.querySelectorAll('.tab-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    ['products', 'messages', 'settings'].forEach((tab) => {
+      $('#tab-' + tab).classList.toggle('hidden', tab !== btn.dataset.tab);
+    });
+  });
+});
+
+// ---------- products ----------
+
+let products = [];
+
+async function loadProducts() {
+  products = await api('/api/products');
+  $('#product-rows').innerHTML = products.map((p) => `
+    <tr>
+      <td><img src="${p.image}" alt=""></td>
+      <td>${p.name_en}<br><span dir="rtl" style="color:var(--gray);">${p.name_fa}</span></td>
+      <td>${p.collection_en || p.collection}</td>
+      <td dir="ltr">${p.size}</td>
+      <td>${p.featured ? '★' : ''}</td>
+      <td>
+        <div class="row-actions">
+          <button class="mini-btn" data-edit="${p.id}">Edit</button>
+          <button class="mini-btn danger" data-del="${p.id}">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+$('#product-rows').addEventListener('click', async (e) => {
+  const editId = e.target.dataset.edit;
+  const delId = e.target.dataset.del;
+  if (editId) {
+    const p = products.find((x) => x.id === Number(editId));
+    const f = $('#product-form');
+    f.id.value = p.id;
+    ['name_en', 'name_fa', 'desc_en', 'desc_fa', 'collection', 'size', 'material_en', 'material_fa', 'knots']
+      .forEach((k) => { f[k].value = p[k]; });
+    f.featured.checked = !!p.featured;
+    $('#form-title').textContent = `Editing: ${p.name_en}`;
+    $('#save-btn').textContent = 'Save changes';
+    $('#cancel-edit').classList.remove('hidden');
+    f.scrollIntoView({ behavior: 'smooth' });
+  }
+  if (delId) {
+    const p = products.find((x) => x.id === Number(delId));
+    if (!confirm(`Delete "${p.name_en}"? This cannot be undone.`)) return;
+    await api(`/api/admin/products/${delId}`, { method: 'DELETE' });
+    loadProducts();
+  }
+});
+
+function resetProductForm() {
+  const f = $('#product-form');
+  f.reset();
+  f.id.value = '';
+  $('#form-title').textContent = 'Add a carpet';
+  $('#save-btn').textContent = 'Save carpet';
+  $('#cancel-edit').classList.add('hidden');
+}
+
+$('#cancel-edit').addEventListener('click', resetProductForm);
+
+$('#product-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const fd = new FormData(f);
+  fd.set('featured', f.featured.checked ? '1' : '0');
+  const id = f.id.value;
+  try {
+    await api(id ? `/api/admin/products/${id}` : '/api/admin/products', {
+      method: id ? 'PUT' : 'POST',
+      body: fd,
+    });
+    note('#product-note', id ? 'Carpet updated.' : 'Carpet added.', true);
+    resetProductForm();
+    loadProducts();
+  } catch (err) {
+    note('#product-note', err.message, false);
+  }
+});
+
+// ---------- messages ----------
+
+async function loadMessages() {
+  const messages = await api('/api/admin/messages');
+  const unread = messages.filter((m) => !m.read).length;
+  const badge = $('#unread-badge');
+  badge.textContent = unread;
+  badge.classList.toggle('hidden', unread === 0);
+  $('#message-list').innerHTML = messages.length === 0
+    ? '<p style="color:var(--gray);">No messages yet.</p>'
+    : messages.map((m) => `
+      <div class="msg-card ${m.read ? '' : 'unread'}">
+        <div class="msg-head">
+          <span><b>${escapeHtml(m.name)}</b>
+            ${m.phone ? ' · <span dir="ltr">' + escapeHtml(m.phone) + '</span>' : ''}
+            ${m.email ? ' · <span dir="ltr">' + escapeHtml(m.email) + '</span>' : ''}</span>
+          <span>${m.created_at}
+            ${m.read ? '' : `<button class="mini-btn" data-read="${m.id}">Mark read</button>`}
+            <button class="mini-btn danger" data-delmsg="${m.id}">Delete</button></span>
+        </div>
+        <div>${escapeHtml(m.message)}</div>
+      </div>`).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+$('#message-list').addEventListener('click', async (e) => {
+  if (e.target.dataset.read) {
+    await api(`/api/admin/messages/${e.target.dataset.read}/read`, { method: 'POST' });
+    loadMessages();
+  }
+  if (e.target.dataset.delmsg) {
+    if (!confirm('Delete this message?')) return;
+    await api(`/api/admin/messages/${e.target.dataset.delmsg}`, { method: 'DELETE' });
+    loadMessages();
+  }
+});
+
+// ---------- password ----------
+
+$('#password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  try {
+    await api('/api/admin/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current: f.current.value, next: f.next.value }),
+    });
+    note('#password-note', 'Password changed.', true);
+    f.reset();
+  } catch (err) {
+    note('#password-note', err.message, false);
+  }
+});
+
+boot();
+</script>
+</body>
+</html>

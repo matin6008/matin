@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collection — Mohtasham Carpets</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&family=Vazirmatn:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="collection">
+
+<section class="page-hero">
+  <div class="container">
+    <h1 data-i18n="collection.title"></h1>
+    <p data-i18n="collection.sub"></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="filters" id="filters"></div>
+    <div class="grid" id="catalog-grid"></div>
+    <p class="empty-note" id="empty-note" data-i18n="collection.empty" hidden></p>
+  </div>
+</section>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/main.js"></script>
+<script>
+document.addEventListener('chrome-ready', async () => {
+  const grid = document.getElementById('catalog-grid');
+  const empty = document.getElementById('empty-note');
+  const filters = document.getElementById('filters');
+  let products = [];
+  let collections = [];
+  let current = new URLSearchParams(location.search).get('c') || 'all';
+
+  const renderFilters = () => {
+    filters.innerHTML =
+      `<button class="filter-btn ${current === 'all' ? 'active' : ''}" data-c="all">${t('collection.all')}</button>` +
+      collections.map((c) =>
+        `<button class="filter-btn ${current === c.slug ? 'active' : ''}" data-c="${c.slug}">${lf(c, 'name')}</button>`
+      ).join('');
+  };
+
+  const render = () => {
+    renderFilters();
+    const list = current === 'all' ? products : products.filter((p) => p.collection === current);
+    grid.innerHTML = list.map(productCard).join('');
+    grid.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+    empty.hidden = list.length > 0;
+  };
+
+  filters.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    current = btn.dataset.c;
+    history.replaceState(null, '', current === 'all' ? '/collection.html' : `/collection.html?c=${current}`);
+    render();
+  });
+
+  document.addEventListener('langchange', render);
+
+  [collections, products] = await Promise.all([api('/api/collections'), api('/api/products')]);
+  render();
+});
+</script>
+</body>
+</html>

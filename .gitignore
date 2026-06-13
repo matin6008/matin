@@ -1,0 +1,10 @@
+# dependencies
+node_modules/
+
+# runtime data (database + uploaded photos) — regenerated on first run from seed/
+data/
+
+# OS / editor cruft
+.DS_Store
+*.log
+npm-debug.log*

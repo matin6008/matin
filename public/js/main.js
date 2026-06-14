@@ -60,17 +60,54 @@ function renderChrome() {
   });
 }
 
-/* Reveal-on-scroll */
+/* Header gains a solid, shadowed state once the page scrolls. */
+function initHeaderScroll() {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 24);
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
+
+/* Reveal-on-scroll, with a gentle stagger between siblings in the same row. */
 function initReveal() {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      const siblings = [...(el.parentElement?.children || [])].filter((n) => n.classList.contains('reveal'));
+      const idx = Math.max(0, siblings.indexOf(el));
+      el.style.transitionDelay = `${Math.min(idx, 6) * 90}ms`;
+      el.classList.add('visible');
+      io.unobserve(el);
+      if (el.querySelector('b')) animateCount(el.querySelector('b'));
     });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+}
+
+/* Count-up for stat figures, preserving any prefix/suffix like "+", "%", or "1,000". */
+function animateCount(node) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const raw = node.dataset.value || (node.dataset.value = node.textContent.trim());
+  const match = raw.match(/[\d.,]+/);
+  if (!match) return;
+  const target = parseFloat(match[0].replace(/,/g, ''));
+  if (!isFinite(target)) return;
+  const prefix = raw.slice(0, match.index);
+  const suffix = raw.slice(match.index + match[0].length);
+  const grouped = match[0].includes(',');
+  const dur = 1400;
+  const start = performance.now();
+  const tick = (now) => {
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = Math.round(target * eased);
+    node.textContent = prefix + (grouped ? val.toLocaleString('en-US') : val) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+    else node.textContent = raw;
+  };
+  requestAnimationFrame(tick);
 }
 
 function productCard(p) {
@@ -166,6 +203,7 @@ function initSpline() {
 document.addEventListener('DOMContentLoaded', () => {
   renderChrome();
   applyI18n();
+  initHeaderScroll();
   initReveal();
   initScrollStages();
   initSpline();

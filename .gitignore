@@ -1,6 +1,9 @@
 # dependencies
 node_modules/
 
+# secrets — Supabase keys live here, never commit
+.env
+
 # runtime data (database + uploaded photos) — regenerated on first run from seed/
 data/
 
@@ -8,3 +11,4 @@ data/
 .DS_Store
 *.log
 npm-debug.log*
+.vercel
